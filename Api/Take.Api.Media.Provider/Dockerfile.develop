@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0
+ARG BUILD_CONFIGURATION=Debug
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+EXPOSE 80
+
+WORKDIR /src
+COPY ["Take.Api.Media.Provider.Facades/Take.Api.Media.Provider.Facades.csproj", "Take.Api.Media.Provider.Facades/"]
+COPY ["Take.Api.Media.Provider.Models/Take.Api.Media.Provider.Models.csproj", "Take.Api.Media.Provider.Models/"]
+COPY ["Take.Api.Media.Provider.Services/Take.Api.Media.Provider.Services.csproj", "Take.Api.Media.Provider.Services/"]
+COPY ["Take.Api.Media.Provider/Take.Api.Media.Provider.csproj", "Take.Api.Media.Provider/"]
+
+RUN dotnet restore "Take.Api.Media.Provider/Take.Api.Media.Provider.csproj"
+COPY . .
+WORKDIR "/src/Take.Api.Media.Provider"
+RUN dotnet build --no-restore "Take.Api.Media.Provider.csproj" -c $BUILD_CONFIGURATION
+
+RUN echo "exec dotnet run --no-build --no-launch-profile -c $BUILD_CONFIGURATION --" > /entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
